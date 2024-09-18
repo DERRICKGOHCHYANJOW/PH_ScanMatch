@@ -25,10 +25,6 @@ Public Class Form2
     Public objWriter As StreamWriter
     Private Sub Form2_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Try
-            cardType = Trim(d2.Rows(0).Item(9))
-            TextBox1.Text = Trim(d2.Rows(0).Item(0))
-            TextBox2.Text = ""
-            TextBox2.Focus()
             TextBox1.ReadOnly = True
             TextBox3.ReadOnly = True
             TextBox4.ReadOnly = True
@@ -42,18 +38,23 @@ Public Class Form2
             Label9.Visible = False
             Label11.Visible = False
             Label13.Visible = False
+            OnOpeningZipLog()
+            cardType = Trim(d2.Rows(0).Item(9))
+            TextBox1.Text = Trim(d2.Rows(0).Item(0))
+            TextBox2.Clear()
+            TextBox2.Focus()
         Catch ex As Exception
             MsgBox(ex.Message & " Error!!", MsgBoxStyle.Critical, "Exception")
         End Try
     End Sub
     Private Sub Form2_Close(sender As Object, e As EventArgs) Handles MyBase.Closed
         Try
+            OnclosingZipLog()
             Application.Exit()
         Catch ex As Exception
             MsgBox(ex.Message & " Error!!", MsgBoxStyle.Critical, "Exception")
         End Try
     End Sub
-
     Private Sub ProcessInput(ByVal myText As String)
         Try
             If Len(myText) = 12 Then
@@ -406,7 +407,7 @@ Public Class Form2
         Dim myUser As String = ""
         Dim myCom As String = ""
         Dim myDate, myTime As String
-        Dim zipfile As String
+        'Dim zipfile As String
 
 
         myUser = Environment.UserName
@@ -418,16 +419,16 @@ Public Class Form2
         Dim recLog As String = "Process1_ScanReport" & "_" & Now.ToString("dd") & Now.ToString("MM") & Now.ToString("yyyy") & ".csv"
 
         Try
-            zipfile = "ProcessOne_report" + "_" + Now.ToString("dd") + Now.ToString("MM") + Now.ToString("yyyy") + ".zip"
-            Dim exePath As String = LoginForm1.ziplocation
-            Dim args1 As String = " e " + """" + My.Application.Info.DirectoryPath + "\1Logs\" + zipfile + """" + " -pGEM" + Now.ToString("dd") + Now.ToString("MM") + Now.ToString("yyyy") + " -o" + """" + My.Application.Info.DirectoryPath + "\1Logs\" + """"
-            Dim args2 As String = " a " + """" + My.Application.Info.DirectoryPath + "\1Logs\" + zipfile + """" + " " + """" + My.Application.Info.DirectoryPath & "\1Logs\" & recLog + """" + " -pGEM" + Now.ToString("dd") + Now.ToString("MM") + Now.ToString("yyyy")
+            'zipfile = "ProcessOne_report" + "_" + Now.ToString("dd") + Now.ToString("MM") + Now.ToString("yyyy") + ".zip"
+            'Dim exePath As String = LoginForm1.ziplocation
+            'Dim args1 As String = " e " + """" + My.Application.Info.DirectoryPath + "\1Logs\" + zipfile + """" + " -pGEM" + Now.ToString("dd") + Now.ToString("MM") + Now.ToString("yyyy") + " -o" + """" + My.Application.Info.DirectoryPath + "\1Logs\" + """"
+            'Dim args2 As String = " a " + """" + My.Application.Info.DirectoryPath + "\1Logs\" + zipfile + """" + " " + """" + My.Application.Info.DirectoryPath & "\1Logs\" & recLog + """" + " -pGEM" + Now.ToString("dd") + Now.ToString("MM") + Now.ToString("yyyy")
 
-            If File.Exists((My.Application.Info.DirectoryPath + "\1Logs\" + zipfile)) Then
-                System.Diagnostics.Process.Start(exePath, args1)
-                Threading.Thread.Sleep(2000)
-                File.Delete((My.Application.Info.DirectoryPath + "\1Logs\" + zipfile))
-            End If
+            'If File.Exists((My.Application.Info.DirectoryPath + "\1Logs\" + zipfile)) Then
+            '    System.Diagnostics.Process.Start(exePath, args1)
+            '    Threading.Thread.Sleep(2000)
+            '    File.Delete((My.Application.Info.DirectoryPath + "\1Logs\" + zipfile))
+            'End If
 
             If Not File.Exists((My.Application.Info.DirectoryPath + "\1Logs\" + recLog)) Then
                 objWriter = My.Computer.FileSystem.OpenTextFileWriter(My.Application.Info.DirectoryPath & "\1Logs\" & recLog, True)
@@ -448,11 +449,11 @@ Public Class Form2
                     objWriter.WriteLine(myCom & "," & myUser & "," & myDate & "," & myTime & ",WorkOrder:" & workID & ",Branch:" & brCo & ",Paks:" & brCnt & ",UID:" & myuID & ",WRONG")
                     objWriter.Close()
             End Select
-            If File.Exists((My.Application.Info.DirectoryPath + "\1Logs\" + recLog)) Then
-                System.Diagnostics.Process.Start(exePath, args2)
-                Threading.Thread.Sleep(2000)
-                File.Delete((My.Application.Info.DirectoryPath + "\1Logs\" + recLog))
-            End If
+            'If File.Exists((My.Application.Info.DirectoryPath + "\1Logs\" + recLog)) Then
+            '    System.Diagnostics.Process.Start(exePath, args2)
+            '    Threading.Thread.Sleep(2000)
+            '    File.Delete((My.Application.Info.DirectoryPath + "\1Logs\" + recLog))
+            'End If
         Catch ex As Exception
             MsgBox(ex.Message & " Error!!", MsgBoxStyle.Critical, "Exception")
         End Try
@@ -474,5 +475,37 @@ Public Class Form2
         Catch ex As Exception
             MsgBox(ex.Message & " Error!!", MsgBoxStyle.Critical, "Exception")
         End Try
+    End Sub
+    Private Sub OnclosingZipLog()
+        Dim zipfile As String
+        Dim recLog As String = "Process1_ScanReport" & "_" & Now.ToString("dd") & Now.ToString("MM") & Now.ToString("yyyy") & ".csv"
+        zipfile = "ProcessOne_report" + "_" + Now.ToString("dd") + Now.ToString("MM") + Now.ToString("yyyy") + ".zip"
+        Dim exePath As String = LoginForm1.ziplocation
+        'Dim args1 As String = " e " + """" + My.Application.Info.DirectoryPath + "\1Logs\" + zipfile + """" + " -pGEM" + Now.ToString("dd") + Now.ToString("MM") + Now.ToString("yyyy") + " -o" + """" + My.Application.Info.DirectoryPath + "\1Logs\" + """"
+        Dim args2 As String = " a " + """" + My.Application.Info.DirectoryPath + "\1Logs\" + zipfile + """" + " " + """" + My.Application.Info.DirectoryPath & "\1Logs\" & recLog + """" + " -pGEM" + Now.ToString("dd") + Now.ToString("MM") + Now.ToString("yyyy")
+
+
+        If File.Exists((My.Application.Info.DirectoryPath + "\1Logs\" + recLog)) Then
+            System.Diagnostics.Process.Start(exePath, args2)
+            Threading.Thread.Sleep(2000)
+            File.Delete((My.Application.Info.DirectoryPath + "\1Logs\" + recLog))
+        End If
+
+    End Sub
+    Private Sub OnOpeningZipLog()
+        Dim zipfile As String
+        Dim recLog As String = "Process1_ScanReport" & "_" & Now.ToString("dd") & Now.ToString("MM") & Now.ToString("yyyy") & ".csv"
+        zipfile = "ProcessOne_report" + "_" + Now.ToString("dd") + Now.ToString("MM") + Now.ToString("yyyy") + ".zip"
+        Dim exePath As String = LoginForm1.ziplocation
+        Dim args1 As String = " e " + """" + My.Application.Info.DirectoryPath + "\1Logs\" + zipfile + """" + " -pGEM" + Now.ToString("dd") + Now.ToString("MM") + Now.ToString("yyyy") + " -o" + """" + My.Application.Info.DirectoryPath + "\1Logs\" + """"
+        'Dim args2 As String = " a " + """" + My.Application.Info.DirectoryPath + "\1Logs\" + zipfile + """" + " " + """" + My.Application.Info.DirectoryPath & "\1Logs\" & recLog + """" + " -pGEM" + Now.ToString("dd") + Now.ToString("MM") + Now.ToString("yyyy")
+
+
+        If File.Exists((My.Application.Info.DirectoryPath + "\1Logs\" + zipfile)) Then
+            System.Diagnostics.Process.Start(exePath, args1)
+            Threading.Thread.Sleep(2000)
+            File.Delete((My.Application.Info.DirectoryPath + "\1Logs\" + zipfile))
+        End If
+
     End Sub
 End Class

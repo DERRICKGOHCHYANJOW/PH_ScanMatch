@@ -38,6 +38,7 @@ Public Class Form5
             TextBox7.ReadOnly = True
             TextBox8.ReadOnly = True
             TextBox9.ReadOnly = True
+            OnOpeningZipLog()
         Catch ex As Exception
             MsgBox(ex.Message & " Error!!", MsgBoxStyle.Critical, "Exception")
         End Try
@@ -45,6 +46,7 @@ Public Class Form5
     End Sub
     Private Sub Form5_Close(sender As Object, e As EventArgs) Handles MyBase.Closed
         Try
+            OnclosingZipLog()
             Application.Exit()
         Catch ex As Exception
             MsgBox(ex.Message & " Error!!", MsgBoxStyle.Critical, "Exception")
@@ -55,7 +57,7 @@ Public Class Form5
         Try
             If e.KeyData = Keys.Enter Then
                 If TextBox1.TextLength > 1 Then
-                    If result2 = False Then
+                    If result = False Then
                         grabRec(ds, TextBox1.Text, BrName, BrCode, ClCode, Tcnt, Tpak, result)
                     End If
                     ProcessInput(TextBox1.Text)
@@ -73,7 +75,6 @@ Public Class Form5
     Private Sub ProcessInput(ByVal myText As String)
         Try
             If result = True Then
-                result2 = True
                 If InStr(currList, myText) <> 0 Then
                     scanStr(myText, currList, currList2, CardT, PakC)
                     If InStr(ScanList, myText) = 0 Then
@@ -107,6 +108,7 @@ Public Class Form5
                             TextBox9.Clear()
                             Spak = 0
                             STc = 0
+                            result = False
                             result2 = False
                         End If
                     Else
@@ -115,6 +117,9 @@ Public Class Form5
                         amberlight()
                         If LoginForm1.p2logs = 1 Then
                             genLog("2", BrName, BrCode, Tpak)
+                        End If
+                        If result2 <> True Then
+                            result = False
                         End If
                     End If
                 Else
@@ -137,6 +142,73 @@ Public Class Form5
             MsgBox(ex.Message & " Error!!", MsgBoxStyle.Critical, "Exception")
         End Try
     End Sub
+    'Private Sub ProcessInput(ByVal myText As String)
+    '    Try
+    '        If result = True Then
+    '            result2 = True
+    '            If InStr(currList, myText) <> 0 Then
+    '                scanStr(myText, currList, currList2, CardT, PakC)
+    '                If InStr(ScanList, myText) = 0 Then
+    '                    TextBox2.Text = BrName
+    '                    TextBox3.Text = BrCode
+    '                    TextBox4.Text = ClCode
+    '                    TextBox5.Text = Tcnt
+    '                    TextBox6.Text = Tpak
+    '                    TextBox7.Text = CardT
+    '                    STc = STc + 1
+    '                    TextBox8.Text = CInt(Tcnt) - STc
+    '                    Spak = Spak + CInt(PakC)
+    '                    TextBox9.Text = CInt(Tpak) - Spak
+    '                    ScanList = ScanList & myText & ","
+    '                    If CInt(TextBox8.Text) = 0 Then
+    '                        If LoginForm1.mpbox = 1 Then
+    '                            MsgBox(CardT & " group is completed! Prepare to scan Next Group", MsgBoxStyle.Information, "Done")
+    '                        End If
+    '                        greenlight()
+    '                        UpdateS(BrCode)
+    '                        If LoginForm1.p2logs = 1 Then
+    '                            genLog("1", BrName, BrCode, Tpak)
+    '                        End If
+    '                        TextBox2.Clear()
+    '                        TextBox3.Clear()
+    '                        TextBox4.Clear()
+    '                        TextBox5.Clear()
+    '                        TextBox6.Clear()
+    '                        TextBox7.Clear()
+    '                        TextBox8.Clear()
+    '                        TextBox9.Clear()
+    '                        Spak = 0
+    '                        STc = 0
+    '                        result2 = False
+    '                    End If
+    '                Else
+    '                    redlight()
+    '                    MsgBox(myText & " has been scanned before!! Check Duplication!!", MsgBoxStyle.Critical, "Pak scanned BEFORE")
+    '                    amberlight()
+    '                    If LoginForm1.p2logs = 1 Then
+    '                        genLog("2", BrName, BrCode, Tpak)
+    '                    End If
+    '                End If
+    '            Else
+    '                redlight()
+    '                MsgBox(myText & " not found in SAME GROUP transmittal!!", MsgBoxStyle.Critical, "NOT in SAME GROUP")
+    '                amberlight()
+    '                If LoginForm1.p2logs = 1 Then
+    '                    genLog("3", ",", ",", ",")
+    '                End If
+    '            End If
+    '        Else
+    '            redlight()
+    '            MsgBox(myText & " not found in transmittal!!", MsgBoxStyle.Critical, "Wrong Pak")
+    '            amberlight()
+    '            If LoginForm1.p2logs = 1 Then
+    '                genLog("3", "-", "-", "-")
+    '            End If
+    '        End If
+    '    Catch ex As Exception
+    '        MsgBox(ex.Message & " Error!!", MsgBoxStyle.Critical, "Exception")
+    '    End Try
+    'End Sub
     Private Sub grabRec(ByVal dt As DataTable, ByVal chkRec As String, ByRef BrN As String, ByRef BrC As String, ByRef ClC As String, ByRef Tc As String, ByRef Tp As String, ByRef res As Boolean)
         Try
             For i = 0 To dt.Rows.Count - 2
@@ -240,7 +312,7 @@ Public Class Form5
         Dim myUser As String = ""
         Dim myCom As String = ""
         Dim myDate, myTime As String
-        Dim zipfile As String
+        'Dim zipfile As String
 
 
         myUser = Environment.UserName
@@ -248,19 +320,20 @@ Public Class Form5
 
         myDate = Now.ToString("dd/MM/yyyy")
         myTime = Now.ToString("HH:mm:ss")
+
+        Dim recLog As String = "Process2_ScanReport" & "_" & Now.ToString("dd") & Now.ToString("MM") & Now.ToString("yyyy") & ".csv"
+
         Try
-            Dim recLog As String = "Process2_ScanReport" & "_" & Now.ToString("dd") & Now.ToString("MM") & Now.ToString("yyyy") & ".csv"
+            'zipfile = "ProcessTWO_report" + "_" + Now.ToString("dd") + Now.ToString("MM") + Now.ToString("yyyy") + ".zip"
+            'Dim exePath As String = LoginForm1.ziplocation
+            'Dim args1 As String = " e " + """" + My.Application.Info.DirectoryPath + "\2Logs\" + zipfile + """" + " -pGEM" + Now.ToString("dd") + Now.ToString("MM") + Now.ToString("yyyy") + " -o" + """" + My.Application.Info.DirectoryPath + "\2Logs\" + """"
+            'Dim args2 As String = " a " + """" + My.Application.Info.DirectoryPath + "\2Logs\" + zipfile + """" + " " + """" + My.Application.Info.DirectoryPath & "\2Logs\" & recLog + """" + " -pGEM" + Now.ToString("dd") + Now.ToString("MM") + Now.ToString("yyyy")
 
-            zipfile = "ProcessTWO_report" + "_" + Now.ToString("dd") + Now.ToString("MM") + Now.ToString("yyyy") + ".zip"
-            Dim exePath As String = LoginForm1.ziplocation
-            Dim args1 As String = " e " + """" + My.Application.Info.DirectoryPath + "\2Logs\" + zipfile + """" + " -pGEM" + Now.ToString("dd") + Now.ToString("MM") + Now.ToString("yyyy") + " -o" + """" + My.Application.Info.DirectoryPath + "\2Logs\" + """"
-            Dim args2 As String = " a " + """" + My.Application.Info.DirectoryPath + "\2Logs\" + zipfile + """" + " " + """" + My.Application.Info.DirectoryPath & "\2Logs\" & recLog + """" + " -pGEM" + Now.ToString("dd") + Now.ToString("MM") + Now.ToString("yyyy")
-
-            If File.Exists((My.Application.Info.DirectoryPath + "\2Logs\" + zipfile)) Then
-                System.Diagnostics.Process.Start(exePath, args1)
-                Threading.Thread.Sleep(2000)
-                File.Delete((My.Application.Info.DirectoryPath + "\2Logs\" + zipfile))
-            End If
+            'If File.Exists((My.Application.Info.DirectoryPath + "\2Logs\" + zipfile)) Then
+            '    System.Diagnostics.Process.Start(exePath, args1)
+            '    Threading.Thread.Sleep(2000)
+            '    File.Delete((My.Application.Info.DirectoryPath + "\2Logs\" + zipfile))
+            'End If
 
             If Not File.Exists((My.Application.Info.DirectoryPath + "\2Logs\" + recLog)) Then
                 objWriter = My.Computer.FileSystem.OpenTextFileWriter(My.Application.Info.DirectoryPath & "\2Logs\" & recLog, True)
@@ -282,11 +355,11 @@ Public Class Form5
                     objWriter.Close()
             End Select
 
-            If File.Exists((My.Application.Info.DirectoryPath + "\2Logs\" + recLog)) Then
-                System.Diagnostics.Process.Start(exePath, args2)
-                Threading.Thread.Sleep(2000)
-                File.Delete((My.Application.Info.DirectoryPath + "\2Logs\" + recLog))
-            End If
+            'If File.Exists((My.Application.Info.DirectoryPath + "\2Logs\" + recLog)) Then
+            '    System.Diagnostics.Process.Start(exePath, args2)
+            '    Threading.Thread.Sleep(2000)
+            '    File.Delete((My.Application.Info.DirectoryPath + "\2Logs\" + recLog))
+            'End If
         Catch ex As Exception
             MsgBox(ex.Message & " Error!!", MsgBoxStyle.Critical, "Exception")
         End Try
@@ -324,5 +397,37 @@ Public Class Form5
         End Try
         MsgBox("Report Generated", MsgBoxStyle.Information, "Done")
         TextBox1.Focus()
+    End Sub
+    Private Sub OnclosingZipLog()
+        Dim zipfile As String
+        Dim recLog As String = "Process1_ScanReport" & "_" & Now.ToString("dd") & Now.ToString("MM") & Now.ToString("yyyy") & ".csv"
+        zipfile = "ProcessOne_report" + "_" + Now.ToString("dd") + Now.ToString("MM") + Now.ToString("yyyy") + ".zip"
+        Dim exePath As String = LoginForm1.ziplocation
+        'Dim args1 As String = " e " + """" + My.Application.Info.DirectoryPath + "\1Logs\" + zipfile + """" + " -pGEM" + Now.ToString("dd") + Now.ToString("MM") + Now.ToString("yyyy") + " -o" + """" + My.Application.Info.DirectoryPath + "\1Logs\" + """"
+        Dim args2 As String = " a " + """" + My.Application.Info.DirectoryPath + "\1Logs\" + zipfile + """" + " " + """" + My.Application.Info.DirectoryPath & "\1Logs\" & recLog + """" + " -pGEM" + Now.ToString("dd") + Now.ToString("MM") + Now.ToString("yyyy")
+
+
+        If File.Exists((My.Application.Info.DirectoryPath + "\1Logs\" + recLog)) Then
+            System.Diagnostics.Process.Start(exePath, args2)
+            Threading.Thread.Sleep(2000)
+            File.Delete((My.Application.Info.DirectoryPath + "\1Logs\" + recLog))
+        End If
+
+    End Sub
+    Private Sub OnOpeningZipLog()
+        Dim zipfile As String
+        Dim recLog As String = "Process1_ScanReport" & "_" & Now.ToString("dd") & Now.ToString("MM") & Now.ToString("yyyy") & ".csv"
+        zipfile = "ProcessOne_report" + "_" + Now.ToString("dd") + Now.ToString("MM") + Now.ToString("yyyy") + ".zip"
+        Dim exePath As String = LoginForm1.ziplocation
+        Dim args1 As String = " e " + """" + My.Application.Info.DirectoryPath + "\1Logs\" + zipfile + """" + " -pGEM" + Now.ToString("dd") + Now.ToString("MM") + Now.ToString("yyyy") + " -o" + """" + My.Application.Info.DirectoryPath + "\1Logs\" + """"
+        'Dim args2 As String = " a " + """" + My.Application.Info.DirectoryPath + "\1Logs\" + zipfile + """" + " " + """" + My.Application.Info.DirectoryPath & "\1Logs\" & recLog + """" + " -pGEM" + Now.ToString("dd") + Now.ToString("MM") + Now.ToString("yyyy")
+
+
+        If File.Exists((My.Application.Info.DirectoryPath + "\1Logs\" + zipfile)) Then
+            System.Diagnostics.Process.Start(exePath, args1)
+            Threading.Thread.Sleep(2000)
+            File.Delete((My.Application.Info.DirectoryPath + "\1Logs\" + zipfile))
+        End If
+
     End Sub
 End Class
